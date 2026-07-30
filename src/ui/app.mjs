@@ -25,6 +25,7 @@ import { LEAK_PRESETS } from '../core/leaks.mjs';
 import { THIRD_OCTAVE, OCTAVE, N_BANDS } from '../core/bands.mjs';
 import { lineChart, barChart, donutChart, paretoChart, heatColor, PALETTE } from './charts.mjs';
 import { Booth3D, facesFromResult } from './viz3d.mjs';
+import { renderSimple, currentOverride, defaultBuildUp, SIMPLE_MATERIALS } from './simple.mjs';
 import { materialColor, swatchCSS } from './appearance.mjs';
 
 const $ = (id) => document.getElementById(id);
@@ -53,6 +54,8 @@ const state = {
   surfaceOverrides: {},
   selectedSurface: null,
   vizMode: 'materials',
+  /** Which interface is showing. 'simple' is the default. */
+  ui: 'simple',
 };
 
 let result = null;
@@ -233,6 +236,25 @@ function initControls() {
     run();
   });
 
+  // UI mode switch
+  $('uiSimple').addEventListener('click', () => setUiMode('simple'));
+  $('uiExpert').addEventListener('click', () => setUiMode('expert'));
+  $('simViewMaterials').addEventListener('click', () => {
+    viz.setMode('materials');
+    $('simViewMaterials').classList.add('on'); $('simViewLeakage').classList.remove('on');
+  });
+  $('simViewLeakage').addEventListener('click', () => {
+    viz.setMode('leakage');
+    $('simViewLeakage').classList.add('on'); $('simViewMaterials').classList.remove('on');
+  });
+  $('simReset').addEventListener('click', () => {
+    state.spec = { ...SCENARIOS['bedroom-good'].spec, name: 'My booth' };
+    state.surfaceOverrides = {};
+    state.gaps = []; state.selectedSurface = null; state.customSpectrum = null;
+    syncControlsFromSpec();
+    run();
+  });
+
   // Tabs
   for (const b of document.querySelectorAll('[data-tab]')) {
     b.addEventListener('click', () => {
@@ -395,6 +417,7 @@ function run(opts = {}) {
   renderDiagnostics();
   renderDetails();
   renderCost();
+  renderSimpleMode();
   if (state.compareTo) renderComparison();
   else $('comparisonOut').innerHTML = '';
 }
@@ -581,6 +604,8 @@ function render3D() {
   if (!viz) {
     viz = new Booth3D($('viz3d'), {
       onSelect: (faceKey, badgeId) => {
+        state.selectedSurface = faceKey && !badgeId ? faceKey : null;
+        renderSimpleMode();
         state.selectedSurface = badgeId ? null : faceKey || null;
         renderEditor(badgeId);
       },
@@ -1471,16 +1496,113 @@ function renderValidation() {
   }
 }
 
+/* ==================== simple mode ==================== */
+
+const SURFACE_KEYS = ['front', 'back', 'left', 'right', 'ceiling', 'floor'];
+
+/** Ensure a surface has an explicit build-up we can edit. */
+function ensureOverride(surface) {
+  const ov = (state.surfaceOverrides ||= {});
+  const target = surface || 'ALL';
+  const seed = currentOverride(state, surface) || {
+    leafA: { materialId: 'plywood', thicknessMm: 18 },
+    leafB: { materialId: 'gypsum', thicknessMm: 12.5 },
+    cavity: { depthMm: 100, fillId: 'rockwool-rwa45', fillFraction: 0.7 },
+    connection: 'separate-frame', bonding: 'screwed',
+  };
+  const keys = target === 'ALL' ? SURFACE_KEYS : [surface];
+  for (const k of keys) {
+    if (typeof ov[k] !== 'object') ov[k] = JSON.parse(JSON.stringify(seed));
+  }
+  return keys;
+}
+
+function editSurface(surface, mutate) {
+  const keys = ensureOverride(surface);
+  for (const k of keys) mutate(state.surfaceOverrides[k]);
+  run();
+}
+
+const simpleHandlers = {
+  patch(patch, quiet) {
+    if (patch.__seal) {
+      state.gaps = state.gaps.map((g) => ({
+        ...g, widthMm: Math.min(g.widthMm, 0.05),
+        sealResistivity: 200000, sealFillFraction: 1,
+        label: (g.label || 'Gap').replace(/unsealed/i, 'sealed'),
+      }));
+    } else {
+      Object.assign(state.spec, patch);
+    }
+    syncControlsFromSpec();
+    run();
+  },
+  setMaterial(id, surface) {
+    editSurface(surface, (c) => {
+      const next = defaultBuildUp(id, c);
+      c.leafA = next.leafA;
+      if (!c.leafB) c.connection = next.connection;
+    });
+  },
+  setThickness(mm, surface) {
+    editSurface(surface, (c) => { c.leafA.thicknessMm = mm; });
+  },
+  setDouble(on, surface) {
+    editSurface(surface, (c) => {
+      if (on) {
+        c.leafB = c.leafB || { materialId: 'gypsum', thicknessMm: 12.5 };
+        c.cavity = c.cavity || { depthMm: 100, fillId: 'rockwool-rwa45', fillFraction: 0.7 };
+        c.connection = 'separate-frame';
+      } else {
+        delete c.leafB; delete c.cavity;
+      }
+    });
+  },
+  applyToAll() {
+    const src = currentOverride(state, state.selectedSurface);
+    if (!src) return;
+    const ov = (state.surfaceOverrides ||= {});
+    for (const k of SURFACE_KEYS) ov[k] = JSON.parse(JSON.stringify(src));
+    run();
+  },
+};
+
+function renderSimpleMode() {
+  if (state.ui !== 'simple' || !result) return;
+  renderSimple($('simplePanel'), {
+    state, result,
+    selectedSurface: state.selectedSurface,
+    on: simpleHandlers,
+  });
+}
+
+function setUiMode(mode) {
+  state.ui = mode;
+  document.body.classList.toggle('expert', mode === 'expert');
+  $('uiSimple').classList.toggle('on', mode === 'simple');
+  $('uiExpert').classList.toggle('on', mode === 'expert');
+  $('uiSimple').setAttribute('aria-selected', String(mode === 'simple'));
+  $('uiExpert').setAttribute('aria-selected', String(mode === 'expert'));
+  // The 3D canvas is a single element shared by both layouts.
+  const host = mode === 'simple' ? $('simVizHost') : $('vizSlot');
+  if (host && viz) host.appendChild(viz.canvas);
+  run();
+  requestAnimationFrame(() => { if (viz) viz.draw(); });
+}
+
 /* ==================== boot ==================== */
 
 function boot() {
   initControls();
+  document.body.classList.remove('expert');
   syncControlsFromSpec();
   renderSourceEditor();
   renderCalibrationInputs();
   run();
   renderMaterialInspector();
   renderValidation();
+  // Hand the canvas to whichever layout is showing.
+  setUiMode(state.ui);
   buildSelect('gapMatA', groupBy(MATERIALS, (m) => m.category), 'gypsum');
   buildSelect('gapMatB', groupBy(MATERIALS, (m) => m.category), 'mdf');
   renderGapStudy();

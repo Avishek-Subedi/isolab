@@ -17,12 +17,38 @@
     </div>
   </div>
   <div class="topmeta">
+    <div class="modeswitch labelled" role="tablist" aria-label="Choose interface">
+      <span class="modeswitch-cap">View</span>
+      <button id="uiSimple" class="on" role="tab" aria-selected="true"
+              title="Guided builder — click to build, four questions, one answer">Simple builder</button>
+      <button id="uiExpert" role="tab" aria-selected="false"
+              title="The original full dashboard — every control, charts and analysis tabs">Full dashboard</button>
+    </div>
     <span class="chip">engine <span id="perf" class="mono">—</span></span>
     <span class="chip">24 × ⅓-octave bands, 50 Hz – 10 kHz</span>
   </div>
 </header>
 
-<div class="layout">
+<!-- ══════════════ SIMPLE MODE ══════════════ -->
+<div id="simpleLayout" class="simple-layout">
+  <div class="sim-stage">
+    <div class="sim-stage-head">
+      <h2>Your booth</h2>
+      <p class="sim-hint">Drag to spin it. Click a wall to change what it is made of. Drag the arrows to resize.</p>
+    </div>
+    <div id="simVizHost" class="sim-viz-host"></div>
+    <div class="sim-stage-foot">
+      <div class="modeswitch small">
+        <button id="simViewMaterials" class="on">Materials</button>
+        <button id="simViewLeakage">Where it leaks</button>
+      </div>
+      <button id="simReset" class="sim-ghost-btn">Start over</button>
+    </div>
+  </div>
+  <div id="simplePanel" class="sim-panel"></div>
+</div>
+
+<div class="layout" id="expertLayout">
 
   <!-- ══════════════ LEFT: controls ══════════════ -->
   <aside class="controls">
@@ -270,7 +296,7 @@
               <button id="modeLeakage" class="seg-btn" type="button">Leakage</button>
             </div>
           </div>
-          <canvas id="viz3d" class="viz"></canvas>
+          <div id="vizSlot"><canvas id="viz3d" class="viz"></canvas></div>
           <div class="viz-controls">
             <label class="field inline">
               <span>Explode</span>

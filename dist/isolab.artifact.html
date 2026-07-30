@@ -436,6 +436,174 @@ legend { color: var(--muted); padding: 0 .3rem; }
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 
+/* ============================================================
+   SIMPLE MODE — guided visual builder
+   ============================================================ */
+
+.modeswitch { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+.modeswitch button {
+  border: none; background: transparent; color: var(--muted);
+  font: inherit; font-size: .78rem; font-weight: 600;
+  padding: .25rem .8rem; border-radius: 999px; cursor: pointer;
+}
+.modeswitch button.on { background: var(--accent); color: #fff; }
+.modeswitch.small button { font-size: .72rem; padding: .2rem .6rem; }
+
+body.expert #simpleLayout { display: none; }
+body:not(.expert) #expertLayout { display: none; }
+
+.simple-layout {
+  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+  gap: 1.1rem; padding: 1.1rem; align-items: start; max-width: 1500px; margin: 0 auto;
+}
+@media (max-width: 1000px) { .simple-layout { grid-template-columns: 1fr; } }
+
+/* --- stage --- */
+.sim-stage {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 1rem 1.1rem 0.9rem; position: sticky; top: 68px;
+}
+@media (max-width: 1000px) { .sim-stage { position: static; } }
+.sim-stage-head h2 { font-size: 1rem; margin: 0 0 .15rem; }
+.sim-viz-host { margin: .6rem 0; }
+.sim-viz-host canvas { height: 460px !important; border-radius: 10px; }
+@media (max-width: 700px) { .sim-viz-host canvas { height: 320px !important; } }
+.sim-stage-foot { display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; }
+
+/* --- panel --- */
+.sim-panel { display: flex; flex-direction: column; gap: .9rem; min-width: 0; }
+
+/* --- the answer --- */
+.sim-answer {
+  border-radius: 14px; padding: 1rem 1.1rem; color: #fff;
+  background: linear-gradient(150deg, #1f2937, #111827);
+  border: 1px solid transparent;
+}
+.sim-answer.good { background: linear-gradient(150deg, #065f46, #043a2b); }
+.sim-answer.warn { background: linear-gradient(150deg, #92400e, #5c2708); }
+.sim-answer.bad  { background: linear-gradient(150deg, #991b1b, #641212); }
+.sim-answer-label { font-size: .74rem; text-transform: uppercase; letter-spacing: .09em; opacity: .8; }
+.sim-big { display: flex; align-items: baseline; gap: .35rem; margin: .1rem 0 .1rem; }
+.sim-big-num { font-size: 3.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.sim-big-unit { font-size: 1.1rem; opacity: .8; }
+.sim-answer-plain { margin: .1rem 0 0; font-size: .95rem; font-weight: 500; }
+.sim-compare { display: flex; flex-direction: column; gap: .12rem; margin-top: .7rem; font-size: .82rem; opacity: .92; }
+.sim-compare strong { margin-top: .25rem; font-size: .88rem; }
+.sim-worst {
+  margin-top: .8rem; padding-top: .7rem; border-top: 1px solid rgba(255,255,255,.22);
+  display: flex; flex-direction: column; gap: .35rem; align-items: flex-start; font-size: .84rem;
+}
+.sim-worst-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; opacity: .75; }
+.sim-fix-btn {
+  margin-top: .2rem; background: #fff; color: #111827; border: none;
+  border-radius: 8px; padding: .45rem .85rem; font: inherit; font-size: .84rem;
+  font-weight: 600; cursor: pointer;
+}
+.sim-fix-btn:hover { transform: translateY(-1px); }
+
+/* --- steps --- */
+.sim-step { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: .9rem 1rem 1rem; }
+.sim-step-head { display: flex; gap: .65rem; align-items: flex-start; margin-bottom: .7rem; }
+.sim-step-n {
+  flex: none; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: .8rem; font-weight: 700;
+  display: grid; place-items: center;
+}
+.sim-step-title { font-size: .98rem; text-transform: none; letter-spacing: 0; color: var(--ink); margin: 0; font-weight: 650; }
+.sim-hint { font-size: .78rem; color: var(--muted); margin: .15rem 0 0; }
+.sim-sub-label { font-size: .78rem; color: var(--muted); margin: .9rem 0 .3rem; font-weight: 600; }
+.sim-step-body { display: flex; flex-direction: column; gap: .55rem; }
+
+/* --- size steppers --- */
+.sim-sizes { display: flex; flex-direction: column; gap: .35rem; }
+.sim-size-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: .4rem; align-items: center; }
+.sim-size-label { font-size: .84rem; color: var(--muted); }
+.sim-size-val { font-family: var(--mono); font-size: .9rem; min-width: 4.2rem; text-align: center; font-variant-numeric: tabular-nums; }
+.sim-step-btn {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--ink); font-size: 1.1rem; line-height: 1; cursor: pointer;
+}
+.sim-step-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* --- material cards --- */
+.sim-mat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: .5rem; }
+.sim-mat {
+  display: flex; flex-direction: column; gap: .25rem; align-items: stretch;
+  padding: .4rem; border: 2px solid var(--line); border-radius: 10px;
+  background: var(--bg); cursor: pointer; text-align: left; font: inherit;
+}
+.sim-mat:hover { border-color: var(--accent); }
+.sim-mat.on { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.sim-mat-swatch { height: 34px; border-radius: 6px; border: 1px solid rgba(0,0,0,.18); display: block; }
+.sim-mat-name { font-size: .78rem; font-weight: 600; color: var(--ink); }
+.sim-mat-note { font-size: .68rem; color: var(--muted); }
+
+/* --- chips --- */
+.sim-inline { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+.sim-inline-label { font-size: .78rem; color: var(--muted); min-width: 4.6rem; }
+.sim-inline-val { font-family: var(--mono); font-size: .82rem; min-width: 3.4rem; text-align: right; }
+.sim-chip {
+  padding: .3rem .6rem; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--bg); color: var(--ink); font: inherit; font-size: .78rem; cursor: pointer;
+}
+.sim-chip:hover { border-color: var(--accent); }
+.sim-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.sim-chip.wide { padding: .34rem .8rem; }
+.sim-range { flex: 1; min-width: 120px; accent-color: var(--accent); }
+
+/* --- pick lists --- */
+.sim-picks { display: flex; flex-direction: column; gap: .35rem; }
+.sim-pick {
+  display: flex; flex-direction: column; gap: .1rem; align-items: flex-start;
+  padding: .5rem .7rem; border: 2px solid var(--line); border-radius: 10px;
+  background: var(--bg); cursor: pointer; text-align: left; font: inherit; width: 100%;
+  border-left-width: 4px;
+}
+.sim-pick:hover { border-color: var(--accent); }
+.sim-pick.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+.sim-pick.t-bad { border-left-color: var(--bad); }
+.sim-pick.t-warn { border-left-color: var(--warn); }
+.sim-pick.t-ok { border-left-color: var(--c-6); }
+.sim-pick.t-good { border-left-color: var(--good); }
+.sim-pick-name { font-size: .86rem; font-weight: 600; }
+.sim-pick-sub { font-size: .74rem; color: var(--muted); }
+
+/* --- source grid --- */
+.sim-src-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: .45rem; }
+.sim-src {
+  display: flex; flex-direction: column; align-items: center; gap: .1rem;
+  padding: .5rem .3rem; border: 2px solid var(--line); border-radius: 10px;
+  background: var(--bg); cursor: pointer; font: inherit;
+}
+.sim-src:hover { border-color: var(--accent); }
+.sim-src.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+.sim-src-icon { font-size: 1.3rem; line-height: 1.1; }
+.sim-src-name { font-size: .76rem; font-weight: 600; color: var(--ink); }
+.sim-src-db { font-size: .66rem; color: var(--muted); font-family: var(--mono); }
+
+.sim-ghost-btn {
+  align-self: flex-start; padding: .35rem .7rem; border: 1px dashed var(--line);
+  border-radius: 8px; background: transparent; color: var(--muted);
+  font: inherit; font-size: .78rem; cursor: pointer;
+}
+.sim-ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.sim-cost {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: .8rem 1rem; display: flex; flex-direction: column; gap: .1rem;
+}
+.sim-cost strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.sim-cost > span:first-child { font-size: .78rem; color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+.modeswitch.labelled { align-items: center; padding-left: .55rem; }
+.modeswitch-cap { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: .35rem; }
+.sim-answer-note {
+  margin: .7rem 0 0; padding-top: .6rem; font-size: .8rem; line-height: 1.45;
+  border-top: 1px solid rgba(255,255,255,.2); opacity: .9;
+}
+
 </style>
 
 <header class="topbar">
@@ -447,12 +615,38 @@ legend { color: var(--muted); padding: 0 .3rem; }
     </div>
   </div>
   <div class="topmeta">
+    <div class="modeswitch labelled" role="tablist" aria-label="Choose interface">
+      <span class="modeswitch-cap">View</span>
+      <button id="uiSimple" class="on" role="tab" aria-selected="true"
+              title="Guided builder — click to build, four questions, one answer">Simple builder</button>
+      <button id="uiExpert" role="tab" aria-selected="false"
+              title="The original full dashboard — every control, charts and analysis tabs">Full dashboard</button>
+    </div>
     <span class="chip">engine <span id="perf" class="mono">—</span></span>
     <span class="chip">24 × ⅓-octave bands, 50 Hz – 10 kHz</span>
   </div>
 </header>
 
-<div class="layout">
+<!-- ══════════════ SIMPLE MODE ══════════════ -->
+<div id="simpleLayout" class="simple-layout">
+  <div class="sim-stage">
+    <div class="sim-stage-head">
+      <h2>Your booth</h2>
+      <p class="sim-hint">Drag to spin it. Click a wall to change what it is made of. Drag the arrows to resize.</p>
+    </div>
+    <div id="simVizHost" class="sim-viz-host"></div>
+    <div class="sim-stage-foot">
+      <div class="modeswitch small">
+        <button id="simViewMaterials" class="on">Materials</button>
+        <button id="simViewLeakage">Where it leaks</button>
+      </div>
+      <button id="simReset" class="sim-ghost-btn">Start over</button>
+    </div>
+  </div>
+  <div id="simplePanel" class="sim-panel"></div>
+</div>
+
+<div class="layout" id="expertLayout">
 
   <!-- ══════════════ LEFT: controls ══════════════ -->
   <aside class="controls">
@@ -700,7 +894,7 @@ legend { color: var(--muted); padding: 0 .3rem; }
               <button id="modeLeakage" class="seg-btn" type="button">Leakage</button>
             </div>
           </div>
-          <canvas id="viz3d" class="viz"></canvas>
+          <div id="vizSlot"><canvas id="viz3d" class="viz"></canvas></div>
           <div class="viz-controls">
             <label class="field inline">
               <span>Explode</span>
@@ -908,6 +1102,7 @@ const { LEAK_PRESETS } = __req("src/core/leaks.mjs");
 const { THIRD_OCTAVE, OCTAVE, N_BANDS } = __req("src/core/bands.mjs");
 const { lineChart, barChart, donutChart, paretoChart, heatColor, PALETTE } = __req("src/ui/charts.mjs");
 const { Booth3D, facesFromResult } = __req("src/ui/viz3d.mjs");
+const { renderSimple, currentOverride, defaultBuildUp, SIMPLE_MATERIALS } = __req("src/ui/simple.mjs");
 const { materialColor, swatchCSS } = __req("src/ui/appearance.mjs");
 
 const $ = (id) => document.getElementById(id);
@@ -936,6 +1131,8 @@ const state = {
   surfaceOverrides: {},
   selectedSurface: null,
   vizMode: 'materials',
+  /** Which interface is showing. 'simple' is the default. */
+  ui: 'simple',
 };
 
 let result = null;
@@ -1116,6 +1313,25 @@ function initControls() {
     run();
   });
 
+  // UI mode switch
+  $('uiSimple').addEventListener('click', () => setUiMode('simple'));
+  $('uiExpert').addEventListener('click', () => setUiMode('expert'));
+  $('simViewMaterials').addEventListener('click', () => {
+    viz.setMode('materials');
+    $('simViewMaterials').classList.add('on'); $('simViewLeakage').classList.remove('on');
+  });
+  $('simViewLeakage').addEventListener('click', () => {
+    viz.setMode('leakage');
+    $('simViewLeakage').classList.add('on'); $('simViewMaterials').classList.remove('on');
+  });
+  $('simReset').addEventListener('click', () => {
+    state.spec = { ...SCENARIOS['bedroom-good'].spec, name: 'My booth' };
+    state.surfaceOverrides = {};
+    state.gaps = []; state.selectedSurface = null; state.customSpectrum = null;
+    syncControlsFromSpec();
+    run();
+  });
+
   // Tabs
   for (const b of document.querySelectorAll('[data-tab]')) {
     b.addEventListener('click', () => {
@@ -1278,6 +1494,7 @@ function run(opts = {}) {
   renderDiagnostics();
   renderDetails();
   renderCost();
+  renderSimpleMode();
   if (state.compareTo) renderComparison();
   else $('comparisonOut').innerHTML = '';
 }
@@ -1464,6 +1681,8 @@ function render3D() {
   if (!viz) {
     viz = new Booth3D($('viz3d'), {
       onSelect: (faceKey, badgeId) => {
+        state.selectedSurface = faceKey && !badgeId ? faceKey : null;
+        renderSimpleMode();
         state.selectedSurface = badgeId ? null : faceKey || null;
         renderEditor(badgeId);
       },
@@ -2354,16 +2573,113 @@ function renderValidation() {
   }
 }
 
+/* ==================== simple mode ==================== */
+
+const SURFACE_KEYS = ['front', 'back', 'left', 'right', 'ceiling', 'floor'];
+
+/** Ensure a surface has an explicit build-up we can edit. */
+function ensureOverride(surface) {
+  const ov = (state.surfaceOverrides ||= {});
+  const target = surface || 'ALL';
+  const seed = currentOverride(state, surface) || {
+    leafA: { materialId: 'plywood', thicknessMm: 18 },
+    leafB: { materialId: 'gypsum', thicknessMm: 12.5 },
+    cavity: { depthMm: 100, fillId: 'rockwool-rwa45', fillFraction: 0.7 },
+    connection: 'separate-frame', bonding: 'screwed',
+  };
+  const keys = target === 'ALL' ? SURFACE_KEYS : [surface];
+  for (const k of keys) {
+    if (typeof ov[k] !== 'object') ov[k] = JSON.parse(JSON.stringify(seed));
+  }
+  return keys;
+}
+
+function editSurface(surface, mutate) {
+  const keys = ensureOverride(surface);
+  for (const k of keys) mutate(state.surfaceOverrides[k]);
+  run();
+}
+
+const simpleHandlers = {
+  patch(patch, quiet) {
+    if (patch.__seal) {
+      state.gaps = state.gaps.map((g) => ({
+        ...g, widthMm: Math.min(g.widthMm, 0.05),
+        sealResistivity: 200000, sealFillFraction: 1,
+        label: (g.label || 'Gap').replace(/unsealed/i, 'sealed'),
+      }));
+    } else {
+      Object.assign(state.spec, patch);
+    }
+    syncControlsFromSpec();
+    run();
+  },
+  setMaterial(id, surface) {
+    editSurface(surface, (c) => {
+      const next = defaultBuildUp(id, c);
+      c.leafA = next.leafA;
+      if (!c.leafB) c.connection = next.connection;
+    });
+  },
+  setThickness(mm, surface) {
+    editSurface(surface, (c) => { c.leafA.thicknessMm = mm; });
+  },
+  setDouble(on, surface) {
+    editSurface(surface, (c) => {
+      if (on) {
+        c.leafB = c.leafB || { materialId: 'gypsum', thicknessMm: 12.5 };
+        c.cavity = c.cavity || { depthMm: 100, fillId: 'rockwool-rwa45', fillFraction: 0.7 };
+        c.connection = 'separate-frame';
+      } else {
+        delete c.leafB; delete c.cavity;
+      }
+    });
+  },
+  applyToAll() {
+    const src = currentOverride(state, state.selectedSurface);
+    if (!src) return;
+    const ov = (state.surfaceOverrides ||= {});
+    for (const k of SURFACE_KEYS) ov[k] = JSON.parse(JSON.stringify(src));
+    run();
+  },
+};
+
+function renderSimpleMode() {
+  if (state.ui !== 'simple' || !result) return;
+  renderSimple($('simplePanel'), {
+    state, result,
+    selectedSurface: state.selectedSurface,
+    on: simpleHandlers,
+  });
+}
+
+function setUiMode(mode) {
+  state.ui = mode;
+  document.body.classList.toggle('expert', mode === 'expert');
+  $('uiSimple').classList.toggle('on', mode === 'simple');
+  $('uiExpert').classList.toggle('on', mode === 'expert');
+  $('uiSimple').setAttribute('aria-selected', String(mode === 'simple'));
+  $('uiExpert').setAttribute('aria-selected', String(mode === 'expert'));
+  // The 3D canvas is a single element shared by both layouts.
+  const host = mode === 'simple' ? $('simVizHost') : $('vizSlot');
+  if (host && viz) host.appendChild(viz.canvas);
+  run();
+  requestAnimationFrame(() => { if (viz) viz.draw(); });
+}
+
 /* ==================== boot ==================== */
 
 function boot() {
   initControls();
+  document.body.classList.remove('expert');
   syncControlsFromSpec();
   renderSourceEditor();
   renderCalibrationInputs();
   run();
   renderMaterialInspector();
   renderValidation();
+  // Hand the canvas to whichever layout is showing.
+  setUiMode(state.ui);
   buildSelect('gapMatA', groupBy(MATERIALS, (m) => m.category), 'gypsum');
   buildSelect('gapMatB', groupBy(MATERIALS, (m) => m.category), 'mdf');
   renderGapStudy();
@@ -9306,6 +9622,390 @@ function shortMaterialName(m) {
 }
 
 Object.assign(__e, { materialColor, shade, paintTexture, swatchCSS, shortMaterialName, isTransparent });
+};
+
+__M["src/ui/simple.mjs"] = (__e, __req) => {
+/**
+ * Simple mode — a guided, visual builder.
+ *
+ * The expert UI exposes every input the engine has, which is right for an
+ * acoustician and wrong for someone who just wants to build a booth. This
+ * mode asks four questions in plain language, answers them with big clickable
+ * cards instead of dropdowns and sliders, and shows one number.
+ *
+ * It drives exactly the same engine — nothing here is a simplified model, only
+ * a simplified set of choices.
+ */
+
+const { MATERIALS } = __req("src/data/materials.mjs");
+const { swatchCSS } = __req("src/ui/appearance.mjs");
+
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+};
+
+/** The wall materials worth offering without explanation. */
+const SIMPLE_MATERIALS = [
+  { id: 'plywood', name: 'Plywood', note: 'Common, stiff' },
+  { id: 'mdf', name: 'MDF', note: 'Best value wood' },
+  { id: 'osb', name: 'OSB', note: 'Cheap sheathing' },
+  { id: 'chipboard', name: 'Chipboard', note: 'Cheap, heavy' },
+  { id: 'hardwood', name: 'Oak / hardwood', note: 'Heavy, pricey' },
+  { id: 'gypsum', name: 'Plasterboard', note: 'Cheapest mass' },
+  { id: 'gypsum-acoustic', name: 'Acoustic board', note: 'Denser board' },
+  { id: 'cement-board', name: 'Cement board', note: 'Very dense' },
+  { id: 'concrete', name: 'Concrete', note: 'The best there is' },
+  { id: 'glass-laminated', name: 'Laminated glass', note: 'For windows' },
+];
+
+/** Door choices, worst to best, with what they actually cost you. */
+const DOORS = [
+  { id: 'hollow', name: 'Old hollow door', sub: 'What most people already have', tone: 'bad' },
+  { id: 'solid-core', name: 'Solid door + tape', sub: 'Cheap upgrade', tone: 'warn' },
+  { id: 'mdf-heavy', name: 'Home-made heavy door', sub: 'Two sheets of MDF, good seals', tone: 'ok' },
+  { id: 'acoustic-45', name: 'Proper acoustic door', sub: 'Bought as a set', tone: 'good' },
+  { id: 'double-airlock', name: 'Two doors + lobby', sub: 'Best value for real isolation', tone: 'good' },
+];
+
+const SOURCES = [
+  { id: 'speech-normal', name: 'Talking', level: 60, icon: '🗣' },
+  { id: 'speech-raised', name: 'Loud voice', level: 72, icon: '📢' },
+  { id: 'singing-male', name: 'Singing', level: 92, icon: '🎤' },
+  { id: 'scream', name: 'Screaming', level: 100, icon: '😱' },
+  { id: 'guitar-electric-amp', name: 'Guitar amp', level: 105, icon: '🎸' },
+  { id: 'drums_acoustic', name: 'Drums', level: 110, icon: '🥁' },
+];
+
+const LISTENERS = [
+  { id: 'bedroom-rented', sep: 'none', dist: 1, name: 'Same room', sub: 'Standing next to it' },
+  { id: 'apartment-neighbour', sep: 'brick-215', dist: 3, name: 'Neighbour', sub: 'Through the party wall' },
+  { id: 'apartment-below', sep: 'timber-floor', dist: 3, name: 'Flat below', sub: 'Through the floor' },
+  { id: 'outdoor-garden', sep: 'none', dist: 5, name: 'Outside', sub: 'In the garden' },
+];
+
+const VENTS = [
+  { id: 'open-hole', name: 'Just a hole', tone: 'bad' },
+  { id: 'flex-2bend', name: 'Flexible duct', tone: 'warn' },
+  { id: 'labyrinth', name: 'Lined, with bends', tone: 'ok' },
+  { id: 'silenced-pro', name: 'Proper silencer', tone: 'good' },
+];
+
+/**
+ * @param {HTMLElement} root
+ * @param {object} ctx  { state, result, selectedSurface, on }
+ */
+function renderSimple(root, ctx) {
+  const { state, result, on } = ctx;
+  root.innerHTML = '';
+
+  /* ---------- the one number that matters ---------- */
+  const t = result.totals;
+  const lvl = t.outsideWithFanA;
+  const tone = lvl > 45 ? 'bad' : lvl > 33 ? 'warn' : 'good';
+
+  const answer = el('div', 'sim-answer ' + tone);
+  const top = el('div', 'sim-answer-top');
+  top.appendChild(el('span', 'sim-answer-label', 'Someone outside hears'));
+  const big = el('div', 'sim-big');
+  big.appendChild(el('span', 'sim-big-num', lvl.toFixed(1)));
+  big.appendChild(el('span', 'sim-big-unit', 'dB'));
+  top.appendChild(big);
+  top.appendChild(el('p', 'sim-answer-plain', plainLevel(lvl)));
+  answer.appendChild(top);
+
+  const cmp = el('div', 'sim-compare');
+  cmp.appendChild(el('span', null, `Inside it's ${t.insideA.toFixed(0)} dB.`));
+  cmp.appendChild(el('span', null, `The room outside is already ${t.backgroundA.toFixed(0)} dB.`));
+  cmp.appendChild(el('strong', null, verdictLine(t.audibleExcessA)));
+  answer.appendChild(cmp);
+
+  // Biggest leak + one-tap fix
+  const worst = result.breakdown.weakest;
+  if (worst && worst.percent > 20) {
+    const fix = el('div', 'sim-worst');
+    fix.appendChild(el('span', 'sim-worst-label', 'Biggest leak'));
+    fix.appendChild(el('strong', null, friendlyPath(worst.label) + ` — ${worst.percent.toFixed(0)}% of it`));
+    const suggestion = suggestFix(worst, state);
+    if (suggestion) {
+      const b = el('button', 'sim-fix-btn', suggestion.label);
+      b.addEventListener('click', () => on.patch(suggestion.patch));
+      fix.appendChild(b);
+    }
+    answer.appendChild(fix);
+  }
+  // If one path dominates, say so plainly — otherwise changing a wall appears
+  // to "do nothing" and the interface feels broken when it is actually right.
+  if (worst && worst.percent > 45) {
+    const note = el('p', 'sim-answer-note',
+      `Almost everything is escaping through ${friendlyPath(worst.label)}, so changing the walls will barely move this number until that is fixed.`);
+    answer.appendChild(note);
+  }
+  root.appendChild(answer);
+
+  /* ---------- step 1: size ---------- */
+  const s1 = step('1', 'How big is it?', 'Or drag the arrows on the booth.');
+  const sizes = el('div', 'sim-sizes');
+  for (const [key, label] of [['L', 'Length'], ['W', 'Width'], ['H', 'Height']]) {
+    const row = el('div', 'sim-size-row');
+    row.appendChild(el('span', 'sim-size-label', label));
+    const minus = el('button', 'sim-step-btn', '−');
+    const val = el('span', 'sim-size-val', (state.spec[key] ?? 1.4).toFixed(1) + ' m');
+    const plus = el('button', 'sim-step-btn', '+');
+    const lim = key === 'H' ? [1.8, 4] : [0.8, 6];
+    minus.addEventListener('click', () => on.patch({ [key]: clamp((state.spec[key] ?? 1.4) - 0.1, lim) }));
+    plus.addEventListener('click', () => on.patch({ [key]: clamp((state.spec[key] ?? 1.4) + 0.1, lim) }));
+    row.append(minus, val, plus);
+    sizes.appendChild(row);
+  }
+  s1.body.appendChild(sizes);
+  const area = result.geometry;
+  s1.body.appendChild(el('p', 'sim-hint',
+    `Floor space ${(area.L * area.W).toFixed(1)} m². ${area.volume < 2.5 ? 'That is tight for one person.' : 'Room for one person and a mic stand.'}`));
+  root.appendChild(s1.card);
+
+  /* ---------- step 2: material ---------- */
+  const target = ctx.selectedSurface;
+  const s2 = step('2', 'What are the walls made of?',
+    target ? `Changing the ${target} only. Click another face to switch, or use the button below.`
+           : 'Click a wall in the picture to change just that one.');
+
+  const grid = el('div', 'sim-mat-grid');
+  const currentId = currentMaterialId(state, target);
+  for (const m of SIMPLE_MATERIALS) {
+    const mat = MATERIALS[m.id];
+    const card = el('button', 'sim-mat' + (m.id === currentId ? ' on' : ''));
+    const sw = el('span', 'sim-mat-swatch');
+    sw.style.background = swatchCSS(mat);
+    card.appendChild(sw);
+    card.appendChild(el('span', 'sim-mat-name', m.name));
+    card.appendChild(el('span', 'sim-mat-note', m.note));
+    card.title = mat.notes;
+    card.addEventListener('click', () => on.setMaterial(m.id, target));
+    grid.appendChild(card);
+  }
+  s2.body.appendChild(grid);
+
+  // thickness + second layer
+  const thick = el('div', 'sim-inline');
+  thick.appendChild(el('span', 'sim-inline-label', 'Thickness'));
+  const tv = currentThickness(state, target);
+  const curMat = MATERIALS[currentMaterialId(state, target) || 'plywood'];
+  for (const mm of (curMat.availableThicknessesMm || [9, 12, 18, 25]).slice(0, 7)) {
+    const b = el('button', 'sim-chip' + (Math.abs(tv - mm) < 0.6 ? ' on' : ''), mm + ' mm');
+    b.addEventListener('click', () => on.setThickness(mm, target));
+    thick.appendChild(b);
+  }
+  s2.body.appendChild(thick);
+
+  const dbl = el('div', 'sim-inline');
+  dbl.appendChild(el('span', 'sim-inline-label', 'Build'));
+  const isDouble = currentIsDouble(state, target);
+  for (const [v, label, note] of [[false, 'Single skin', 'one layer'], [true, 'Double wall + insulation', 'far better']]) {
+    const b = el('button', 'sim-chip wide' + (isDouble === v ? ' on' : ''), label);
+    b.title = note;
+    b.addEventListener('click', () => on.setDouble(v, target));
+    dbl.appendChild(b);
+  }
+  s2.body.appendChild(dbl);
+
+  if (target) {
+    const all = el('button', 'sim-ghost-btn', 'Use this on every wall');
+    all.addEventListener('click', () => on.applyToAll());
+    s2.body.appendChild(all);
+  }
+  root.appendChild(s2.card);
+
+  /* ---------- step 3: door + vent ---------- */
+  const s3 = step('3', 'What about the door?', 'This is usually the biggest leak.');
+  s3.body.appendChild(pickList(DOORS, state.spec.door, (id) => on.patch({ door: id })));
+  s3.body.appendChild(el('p', 'sim-sub-label', 'Air vent'));
+  s3.body.appendChild(pickList(VENTS, state.spec.ventPreset, (id) => on.patch({ ventPreset: id })));
+  s3.body.appendChild(el('p', 'sim-hint',
+    'A booth with no vent gets dangerous within about 15 minutes, so this is not optional.'));
+  root.appendChild(s3.card);
+
+  /* ---------- step 4: sound + listener ---------- */
+  const s4 = step('4', 'What happens inside, and who might hear?');
+  const srcGrid = el('div', 'sim-src-grid');
+  for (const s of SOURCES) {
+    const b = el('button', 'sim-src' + (state.spec.sourceId === s.id ? ' on' : ''));
+    b.appendChild(el('span', 'sim-src-icon', s.icon));
+    b.appendChild(el('span', 'sim-src-name', s.name));
+    b.appendChild(el('span', 'sim-src-db', s.level + ' dB'));
+    b.addEventListener('click', () => on.patch({ sourceId: s.id, level: s.level }));
+    srcGrid.appendChild(b);
+  }
+  s4.body.appendChild(srcGrid);
+
+  const loud = el('div', 'sim-inline');
+  loud.appendChild(el('span', 'sim-inline-label', 'Loudness'));
+  const sl = el('input');
+  sl.type = 'range'; sl.min = '40'; sl.max = '120'; sl.step = '1';
+  sl.value = String(state.spec.level ?? 100);
+  sl.className = 'sim-range';
+  const slv = el('span', 'sim-inline-val', (state.spec.level ?? 100) + ' dB');
+  sl.addEventListener('input', () => { slv.textContent = sl.value + ' dB'; on.patch({ level: Number(sl.value) }, true); });
+  loud.append(sl, slv);
+  s4.body.appendChild(loud);
+
+  s4.body.appendChild(el('p', 'sim-sub-label', 'Who is listening?'));
+  const curListener = LISTENERS.find((l) => l.id === state.spec.envId) || LISTENERS[0];
+  s4.body.appendChild(pickList(
+    LISTENERS.map((l) => ({ id: l.id, name: l.name, sub: l.sub })),
+    curListener.id,
+    (id) => {
+      const l = LISTENERS.find((x) => x.id === id);
+      on.patch({ envId: l.id, separatingElementId: l.sep, distanceM: l.dist });
+    }
+  ));
+  root.appendChild(s4.card);
+
+  /* ---------- cost ---------- */
+  const money = el('div', 'sim-cost');
+  money.appendChild(el('span', null, 'Rough materials cost'));
+  money.appendChild(el('strong', null, '£' + Math.round(result.cost.total).toLocaleString()));
+  money.appendChild(el('span', 'sim-hint', 'Materials only — no labour, tools or waste.'));
+  root.appendChild(money);
+}
+
+/* ---------------- helpers ---------------- */
+
+function step(n, title, hint) {
+  const card = el('section', 'sim-step');
+  const head = el('div', 'sim-step-head');
+  head.appendChild(el('span', 'sim-step-n', n));
+  const tw = el('div');
+  tw.appendChild(el('h3', 'sim-step-title', title));
+  if (hint) tw.appendChild(el('p', 'sim-hint', hint));
+  head.appendChild(tw);
+  card.appendChild(head);
+  const body = el('div', 'sim-step-body');
+  card.appendChild(body);
+  return { card, body };
+}
+
+function pickList(items, current, onPick) {
+  const wrap = el('div', 'sim-picks');
+  for (const it of items) {
+    const b = el('button', 'sim-pick' + (it.id === current ? ' on' : '') + (it.tone ? ' t-' + it.tone : ''));
+    b.appendChild(el('span', 'sim-pick-name', it.name));
+    if (it.sub) b.appendChild(el('span', 'sim-pick-sub', it.sub));
+    b.addEventListener('click', () => onPick(it.id));
+    wrap.appendChild(b);
+  }
+  return wrap;
+}
+
+const clamp = (v, [lo, hi]) => Math.round(Math.max(lo, Math.min(hi, v)) * 10) / 10;
+
+function plainLevel(dBA) {
+  if (dBA < 20) return 'Silent. You would not know it was on.';
+  if (dBA < 28) return 'About as loud as a quiet bedroom at night.';
+  if (dBA < 35) return 'Very quiet — like a library.';
+  if (dBA < 45) return 'Like a quiet office. Noticeable if the room is still.';
+  if (dBA < 55) return 'About as loud as a normal conversation.';
+  if (dBA < 65) return 'Loud conversation. Hard to ignore.';
+  if (dBA < 75) return 'As loud as a vacuum cleaner in the room.';
+  return 'Very loud. Nothing is being contained.';
+}
+
+function verdictLine(excess) {
+  if (excess <= -5) return 'Nobody will hear it.';
+  if (excess <= 0) return 'Effectively inaudible.';
+  if (excess <= 3) return 'Only noticeable if someone listens for it.';
+  if (excess <= 8) return 'Clearly audible, but probably tolerable.';
+  if (excess <= 15) return 'Clearly audible. Likely to annoy someone at night.';
+  return 'Far too loud. Expect complaints.';
+}
+
+function friendlyPath(label) {
+  const l = String(label);
+  if (/threshold/i.test(l)) return 'the gap under the door';
+  if (/perimeter/i.test(l)) return 'the gap around the door';
+  if (/frame-to-wall/i.test(l)) return 'the gap around the door frame';
+  if (/door leaf|through the material/i.test(l)) return 'the door itself';
+  if (/bore|duct|vent/i.test(l)) return 'the air vent';
+  if (/socket/i.test(l)) return 'the socket box in the wall';
+  if (/junction/i.test(l)) return 'the gap where the wall meets the floor';
+  if (/flanking/i.test(l)) return 'vibration through the building';
+  if (/window|vision/i.test(l)) return 'the window';
+  if (/^(Front|Back|Left|Right|Ceiling|Floor)/i.test(l)) return 'the ' + l.split(' ')[0].toLowerCase() + ' wall';
+  return l.length > 40 ? l.slice(0, 40) + '…' : l;
+}
+
+function suggestFix(worst, state) {
+  const l = String(worst.label);
+  const order = ['hollow', 'solid-core', 'mdf-heavy', 'acoustic-45', 'double-airlock'];
+  if (/door/i.test(l)) {
+    const i = order.indexOf(state.spec.door);
+    if (i >= 0 && i < order.length - 1) {
+      return { label: 'Fix it: upgrade the door', patch: { door: order[i + 1] } };
+    }
+  }
+  const vents = ['open-hole', 'straight-unlined', 'flex-2bend', 'labyrinth', 'silenced-pro'];
+  if (/duct|vent|bore/i.test(l)) {
+    const i = vents.indexOf(state.spec.ventPreset);
+    if (i >= 0 && i < vents.length - 1) {
+      return { label: 'Fix it: better vent', patch: { ventPreset: vents[i + 1] } };
+    }
+  }
+  if (/junction|socket|gap/i.test(l)) {
+    return { label: 'Fix it: seal the gaps', patch: { __seal: true } };
+  }
+  return null;
+}
+
+/* --- reading the current state for a surface (or the global default) --- */
+
+const SURFACES = ['front', 'back', 'left', 'right', 'ceiling', 'floor'];
+
+function currentOverride(state, surface) {
+  const ov = state.surfaceOverrides || {};
+  if (surface && typeof ov[surface] === 'object') return ov[surface];
+  const any = SURFACES.map((k) => ov[k]).find((v) => v && typeof v === 'object');
+  return any || null;
+}
+
+function currentMaterialId(state, surface) {
+  const c = currentOverride(state, surface);
+  return c ? c.leafA.materialId : null;
+}
+function currentThickness(state, surface) {
+  const c = currentOverride(state, surface);
+  return c ? c.leafA.thicknessMm : 18;
+}
+function currentIsDouble(state, surface) {
+  const c = currentOverride(state, surface);
+  return c ? !!c.leafB : null;
+}
+
+/** A sensible starting wall build-up for a chosen material. */
+function defaultBuildUp(materialId, prev) {
+  const m = MATERIALS[materialId];
+  // Snap to a thickness the material is actually sold in. Carrying the previous
+  // number across gives nonsense like an 18 mm concrete wall, which is both
+  // unbuildable and — because thin concrete has a coincidence dip right in the
+  // vocal range — performs worse than the plywood it replaced. That reads as a
+  // broken control when it is really a bad default.
+  const avail = m.availableThicknessesMm || [18];
+  const want = prev?.leafA?.thicknessMm ?? 18;
+  const t = avail.reduce((best, v) => (Math.abs(v - want) < Math.abs(best - want) ? v : best), avail[0]);
+  const base = {
+    leafA: { materialId, thicknessMm: t },
+    connection: 'separate-frame',
+    bonding: 'screwed',
+  };
+  if (prev?.leafB) {
+    base.leafB = { materialId: prev.leafB.materialId, thicknessMm: prev.leafB.thicknessMm };
+    base.cavity = prev.cavity || { depthMm: 100, fillId: 'rockwool-rwa45', fillFraction: 0.7 };
+  }
+  return base;
+}
+
+Object.assign(__e, { renderSimple, currentOverride, defaultBuildUp, SIMPLE_MATERIALS });
 };
 
 __req("src/ui/app.mjs");
