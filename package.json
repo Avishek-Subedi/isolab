@@ -1,0 +1,25 @@
+{
+  "name": "isolab",
+  "version": "1.0.0",
+  "description": "IsoLab \u2014 professional acoustic isolation simulator for booths, studios and enclosures. Frequency-resolved transmission-loss, leakage, duct, resonance and structure-borne modelling.",
+  "type": "module",
+  "main": "src/core/index.mjs",
+  "exports": {
+    ".": "./src/core/index.mjs",
+    "./data": "./src/data/index.mjs"
+  },
+  "scripts": {
+    "start": "node cli/serve.mjs",
+    "sim": "node cli/simulate.mjs",
+    "test": "node tests/run.mjs",
+    "validate": "node cli/simulate.mjs --validate",
+    "bundle": "node cli/bundle.mjs && node cli/bundle.mjs --artifact",
+    "typecheck": "tsc -p jsconfig.json   # optional: requires `npm i -D typescript`"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

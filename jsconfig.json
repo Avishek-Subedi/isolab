@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+    "strict": false,
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": ["src/**/*.mjs", "cli/**/*.mjs", "tests/**/*.mjs"]
+}

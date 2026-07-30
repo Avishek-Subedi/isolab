@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IsoLab — acoustic isolation simulator</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">◪</span>
+    <div>
+      <h1>IsoLab</h1>
+      <p class="tagline">Acoustic isolation simulator — frequency-resolved transmission, leakage, ducts and flanking</p>
+    </div>
+  </div>
+  <div class="topmeta">
+    <span class="chip">engine <span id="perf" class="mono">—</span></span>
+    <span class="chip">24 × ⅓-octave bands, 50 Hz – 10 kHz</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ══════════════ LEFT: controls ══════════════ -->
+  <aside class="controls">
+
+    <section class="group">
+      <h3>Scenario</h3>
+      <label class="field">
+        <span>Start from a preset</span>
+        <select id="scenario"></select>
+      </label>
+      <p id="scenarioNote" class="muted small"></p>
+    </section>
+
+    <section class="group">
+      <h3>Sound source inside</h3>
+      <label class="field">
+        <span>Source</span>
+        <select id="source"></select>
+      </label>
+      <label class="field">
+        <span>Level <b id="levelVal" class="mono">100 dB</b></span>
+        <input type="range" id="level" min="30" max="130" step="1" value="100">
+        <span class="ticks"><i>30</i><i>50</i><i>70</i><i>90</i><i>110</i><i>130</i></span>
+      </label>
+      <label class="field">
+        <span>Level means</span>
+        <select id="sourceMode">
+          <option value="internal-spl">SPL measured inside the booth</option>
+          <option value="source-at-1m">Source SPL at 1 m free field (adds booth build-up)</option>
+        </select>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="advToggle">
+        <span>Advanced: edit the spectrum by hand</span>
+      </label>
+      <div id="sourceEditor"></div>
+    </section>
+
+    <section class="group">
+      <h3>Booth dimensions</h3>
+      <label class="field">
+        <span>Length <b id="LVal" class="mono"></b></span>
+        <input type="range" id="L" min="0.8" max="6" step="0.05" value="1.4">
+      </label>
+      <label class="field">
+        <span>Width <b id="WVal" class="mono"></b></span>
+        <input type="range" id="W" min="0.8" max="6" step="0.05" value="1.4">
+      </label>
+      <label class="field">
+        <span>Height <b id="HVal" class="mono"></b></span>
+        <input type="range" id="H" min="1.8" max="4" step="0.05" value="2.1">
+      </label>
+    </section>
+
+    <section class="group">
+      <h3>Construction</h3>
+      <label class="field">
+        <span>Wall assembly</span>
+        <select id="wall"></select>
+      </label>
+      <label class="field">
+        <span>Ceiling assembly</span>
+        <select id="ceilingAssembly"></select>
+      </label>
+      <label class="field">
+        <span>Door</span>
+        <select id="door"></select>
+      </label>
+      <label class="field">
+        <span>Floor isolation</span>
+        <select id="floorSystem"></select>
+      </label>
+    </section>
+
+    <section class="group">
+      <h3>Ventilation</h3>
+      <label class="field">
+        <span>Duct design</span>
+        <select id="vent"></select>
+      </label>
+      <label class="field">
+        <span>Airflow per duct <b id="airflowVal" class="mono"></b></span>
+        <input type="range" id="airflow" min="2" max="60" step="1" value="12">
+      </label>
+      <label class="field">
+        <span>Occupants <b id="occupantsVal" class="mono"></b></span>
+        <input type="range" id="occupants" min="1" max="6" step="1" value="1">
+      </label>
+    </section>
+
+    <section class="group">
+      <h3>Internal treatment</h3>
+      <label class="field">
+        <span>Absorber</span>
+        <select id="treatMaterial"></select>
+      </label>
+      <label class="field">
+        <span>Thickness <b id="treatThicknessVal" class="mono"></b></span>
+        <input type="range" id="treatThickness" min="0" max="200" step="5" value="50">
+      </label>
+      <label class="field">
+        <span>Coverage <b id="treatCoverageVal" class="mono"></b></span>
+        <input type="range" id="treatCoverage" min="0" max="100" step="5" value="70">
+      </label>
+    </section>
+
+    <section class="group">
+      <h3>Air leaks &amp; penetrations</h3>
+      <select id="leakPreset"></select>
+      <div id="leakList" class="leak-list"></div>
+    </section>
+
+    <section class="group">
+      <h3>Listener &amp; environment</h3>
+      <label class="field">
+        <span>Environment</span>
+        <select id="env"></select>
+      </label>
+      <label class="field">
+        <span>Distance <b id="distanceVal" class="mono"></b></span>
+        <input type="range" id="distance" min="0.5" max="15" step="0.5" value="1">
+      </label>
+      <label class="field">
+        <span>Separating building element</span>
+        <select id="separating"></select>
+      </label>
+    </section>
+
+    <section class="group">
+      <h3>Compare against</h3>
+      <label class="field">
+        <span>Alternative wall</span>
+        <select id="compareWall"></select>
+      </label>
+      <div id="comparisonOut"></div>
+    </section>
+
+  </aside>
+
+  <!-- ══════════════ RIGHT: results ══════════════ -->
+  <main class="results">
+
+    <!-- Headline chain -->
+    <section class="card headline">
+      <div class="chain">
+        <div class="chain-card inside">
+          <span class="chain-label">INSIDE</span>
+          <span class="chain-value"><b id="insideVal">—</b> <i>dB SPL</i></span>
+          <span class="chain-sub" id="insideSub"></span>
+        </div>
+        <div class="chain-arrow">↓</div>
+        <div class="chain-card iso">
+          <span class="chain-label">BOOTH ISOLATION</span>
+          <span class="chain-value"><b id="isoVal">—</b> <i>dB</i></span>
+          <span class="chain-sub" id="isoSub"></span>
+        </div>
+        <div class="chain-arrow">↓</div>
+        <div class="chain-card" id="outsideCard">
+          <span class="chain-label">OUTSIDE</span>
+          <span class="chain-value"><b id="outsideVal">—</b> <i>dB SPL</i></span>
+          <span class="chain-sub" id="outsideSub"></span>
+        </div>
+      </div>
+
+      <div class="verdict">
+        <p id="verdictText" class="verdict-main"></p>
+        <p id="verdictDesc" class="muted small"></p>
+        <div class="verdict-row">
+          <span class="kvi">Background <b id="bgVal" class="mono">—</b> dB(A)</span>
+          <span class="kvi">Perceived <b id="perceivedVal" class="mono">—</b> dB(A)</span>
+          <span class="kvi">Excess <span id="excessVal" class="pill">—</span></span>
+          <span class="kvi" id="nrVal"></span>
+        </div>
+      </div>
+
+      <div class="scale-wrap">
+        <div class="scale-track"><div id="scalePointer" class="scale-pointer">—</div></div>
+        <div id="levelScale" class="scale"></div>
+      </div>
+
+      <div id="criteria" class="criteria"></div>
+    </section>
+
+    <!-- Tabs -->
+    <nav class="tabs">
+      <button data-tab="tabOverview" class="active">Spectrum &amp; leakage</button>
+      <button data-tab="tab3d">3D escape map</button>
+      <button data-tab="tabDiagnosis">Diagnosis</button>
+      <button data-tab="tabPhysics">Physics detail</button>
+      <button data-tab="tabOptimiser">Optimiser</button>
+      <button data-tab="tabGap">Air-gap study</button>
+      <button data-tab="tabMaterials">Material advisor</button>
+      <button data-tab="tabCalibration">Reality calibration</button>
+      <button data-tab="tabValidation">Validation</button>
+    </nav>
+
+    <!-- Overview -->
+    <section id="tabOverview" data-panel class="panel active">
+      <div class="grid2">
+        <div class="card">
+          <h3>Inside vs outside, by frequency</h3>
+          <canvas id="chartSpectrum" class="chart tall"></canvas>
+          <div id="legendSpectrum" class="legend"></div>
+          <p class="muted small">Every prediction is computed in 24 one-third-octave bands. A single dB number
+            cannot distinguish a bass leak from a treble leak, and those need opposite remedies.</p>
+        </div>
+        <div class="card">
+          <h3>Transmission loss</h3>
+          <canvas id="chartTL" class="chart tall"></canvas>
+          <div id="legendTL" class="legend"></div>
+          <p class="muted small">The gap between the wall's own curve and the composite envelope is what the door,
+            the vent and the leaks are costing you.</p>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="card">
+          <h3>Where the sound escapes</h3>
+          <canvas id="chartDonut" class="chart square"></canvas>
+          <div id="donutLegend" class="legend-list"></div>
+          <p class="muted small">Genuine share of transmitted acoustic power, A-weighted.</p>
+        </div>
+        <div class="card">
+          <h3>Individual paths</h3>
+          <div id="pathList" class="path-list"></div>
+        </div>
+        <div class="card">
+          <h3>Best possible gain per path</h3>
+          <p class="muted small">If you eliminated this path entirely, the total would fall by at most:</p>
+          <div id="potentialList" class="legend-list"></div>
+          <h3 class="mt">Dominant path per octave</h3>
+          <div id="dominantBands" class="legend-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3D -->
+    <section id="tab3d" data-panel class="panel">
+      <div class="grid-3d">
+        <div class="card">
+          <div class="viz-head">
+            <h3>Booth builder</h3>
+            <div class="seg" role="group" aria-label="View mode">
+              <button id="modeMaterials" class="seg-btn active" type="button">Materials</button>
+              <button id="modeLeakage" class="seg-btn" type="button">Leakage</button>
+            </div>
+          </div>
+          <canvas id="viz3d" class="viz"></canvas>
+          <div class="viz-controls">
+            <label class="field inline">
+              <span>Explode</span>
+              <input type="range" id="explode" min="0" max="60" step="1" value="14">
+            </label>
+            <label class="check">
+              <input type="checkbox" id="handles" checked>
+              <span>Dimension handles</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="waves" checked>
+              <span>Animate escaping sound</span>
+            </label>
+            <div class="heat-key" id="heatKeyWrap">
+              <span class="small muted">good</span>
+              <span id="heatKey" class="key-ramp"></span>
+              <span class="small muted">major leak</span>
+            </div>
+          </div>
+          <p class="muted small" id="vizHint"></p>
+        </div>
+        <div class="card">
+          <h3 id="editorTitle">Selection</h3>
+          <div id="wallEditor"></div>
+          <div id="vizSelection"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Diagnosis -->
+    <section id="tabDiagnosis" data-panel class="panel">
+      <div class="card">
+        <h3>Diagnosis and recommendations</h3>
+        <div id="diagnostics"></div>
+      </div>
+    </section>
+
+    <!-- Physics -->
+    <section id="tabPhysics" data-panel class="panel">
+      <div class="grid3">
+        <div class="card">
+          <h3>Wall physics</h3>
+          <div id="wallPhysics" class="kv-grid"></div>
+          <h3 class="mt">What limits each band</h3>
+          <div id="limitedBy" class="legend-list"></div>
+        </div>
+        <div class="card">
+          <h3>Inside the booth</h3>
+          <div id="internalAcoustics" class="kv-grid"></div>
+          <h3 class="mt">Ventilation</h3>
+          <div id="ventDetail" class="kv-grid"></div>
+        </div>
+        <div class="card">
+          <h3>Indicative cost</h3>
+          <div id="costList" class="kv-grid"></div>
+          <p class="muted small">Materials and components only, ex-VAT, UK retail. Excludes labour,
+            tools, fixings and waste. Treat as a relative guide for comparing designs.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optimiser -->
+    <section id="tabOptimiser" data-panel class="panel">
+      <div class="card">
+        <h3>Design optimiser</h3>
+        <div class="opt-controls">
+          <label class="field">
+            <span>Target outside level <b id="targetVal" class="mono"></b></span>
+            <input type="range" id="target" min="15" max="60" step="1" value="35">
+          </label>
+          <label class="field">
+            <span>Budget <b id="budgetVal" class="mono"></b></span>
+            <input type="range" id="budget" min="200" max="8000" step="100" value="2000">
+          </label>
+          <fieldset id="optGroups">
+            <legend class="small">Search over</legend>
+            <label class="check"><input type="checkbox" value="wall" checked><span>Wall</span></label>
+            <label class="check"><input type="checkbox" value="door" checked><span>Door</span></label>
+            <label class="check"><input type="checkbox" value="vent" checked><span>Ventilation</span></label>
+            <label class="check"><input type="checkbox" value="floor"><span>Floor</span></label>
+            <label class="check"><input type="checkbox" value="sealing"><span>Sealing</span></label>
+          </fieldset>
+          <button id="runOptimise" class="btn primary">Run optimiser</button>
+        </div>
+        <div id="optimiserOut"></div>
+      </div>
+    </section>
+
+    <!-- Air gap study -->
+    <section id="tabGap" data-panel class="panel">
+      <div class="card">
+        <h3>Air-gap study</h3>
+        <p class="muted small">How the cavity depth changes the answer, and where it stops helping.</p>
+        <div class="opt-controls">
+          <label class="field"><span>Inner leaf</span><select id="gapMatA"></select></label>
+          <label class="field"><span>mm</span><input type="number" id="gapThickA" value="12.5" step="0.5" min="1" class="mini"></label>
+          <label class="field"><span>Outer leaf</span><select id="gapMatB"></select></label>
+          <label class="field"><span>mm</span><input type="number" id="gapThickB" value="18" step="0.5" min="1" class="mini"></label>
+          <label class="check"><input type="checkbox" id="gapFilled" checked><span>Cavity 70% filled with mineral wool</span></label>
+          <button id="gapStudyRun" class="btn">Recompute</button>
+        </div>
+        <div id="gapLegend" class="legend"></div>
+        <div id="gapStudyOut"></div>
+      </div>
+    </section>
+
+    <!-- Materials -->
+    <section id="tabMaterials" data-panel class="panel">
+      <div class="card">
+        <h3>Material advisor</h3>
+        <div class="opt-controls">
+          <label class="field"><span>Material</span><select id="inspectMaterial"></select></label>
+          <label class="field">
+            <span>Thickness <b id="inspectThicknessVal" class="mono"></b></span>
+            <input type="range" id="inspectThickness" min="1" max="300" step="1" value="50">
+          </label>
+        </div>
+        <div id="materialOut"></div>
+      </div>
+    </section>
+
+    <!-- Calibration -->
+    <section id="tabCalibration" data-panel class="panel">
+      <div class="grid2">
+        <div class="card">
+          <h3>Enter what you actually measured</h3>
+          <div class="opt-controls">
+            <label class="field"><span>Inside level, dB</span><input type="number" id="measInside" value="100" class="mini"></label>
+            <label class="field"><span>Outside level, dB</span><input type="number" id="measOutside" value="38" class="mini"></label>
+            <label class="field"><span>Background, dB</span><input type="number" id="measBackground" placeholder="optional" class="mini"></label>
+            <label class="field"><span>Weighting</span>
+              <select id="measWeighting"><option value="A">dB(A)</option><option value="Z">dB (unweighted)</option></select>
+            </label>
+          </div>
+          <h4>Measured outside level per octave band (optional but far more useful)</h4>
+          <div id="measuredBands" class="eq-grid"></div>
+          <div class="btn-row">
+            <button id="runCalibration" class="btn primary">Compare with prediction</button>
+            <button id="clearCalibration" class="btn">Clear calibration</button>
+          </div>
+          <div id="protocol" class="protocol"></div>
+        </div>
+        <div class="card">
+          <h3>Accuracy and diagnosis</h3>
+          <div id="calibrationOut"><p class="muted small">Enter a measurement and press compare.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Validation -->
+    <section id="tabValidation" data-panel class="panel">
+      <div class="card">
+        <h3>Validation against published laboratory data</h3>
+        <p class="muted small">The engine is semi-empirical. These are the constructions it was pinned against —
+          if a physics change breaks one of these, it is a regression. Laboratory ratings are the ceiling, not
+          the expectation: a wall tested at STC 55 routinely measures 45–50 as built, which is exactly why this
+          simulator models leaks, ducts and flanking explicitly instead of quoting a lab number.</p>
+        <div id="validationOut"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="app.mjs"></script>
+</body>
+</html>
