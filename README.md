@@ -12,6 +12,9 @@ Not a decibel calculator. It solves an acoustic power balance across 24
 one-third-octave bands and nine physical transmission mechanisms, identifies which
 one is limiting your design, and tells you what to do about it.
 
+**▶ Live: https://avishek-subedi.github.io/isolab/** — runs entirely in the
+browser, nothing to install.
+
 ```bash
 npm test              # 171 tests, zero dependencies
 npm run validate      # validation against 18 published lab constructions
@@ -139,7 +142,11 @@ sandbox with a strict CSP:
 ```
 dist/isolab.html            standalone page, open it directly
 dist/isolab.artifact.html   fragment for hosts that supply the document skeleton
+index.html                  copy of the bundle, served by GitHub Pages
 ```
+
+After changing anything under `src/`, run `npm run bundle && cp dist/isolab.html index.html`
+and push — that is what updates the live site.
 
 The bundler (`cli/bundle.mjs`) is a lazy module registry plus a mechanical
 import/export rewrite — the graph is small and acyclic, so no build dependency
